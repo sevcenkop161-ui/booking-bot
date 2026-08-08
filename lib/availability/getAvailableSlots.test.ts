@@ -98,6 +98,20 @@ describe("getAvailableSlots", () => {
     expect(slots).toEqual([]);
   });
 
+  it("returns no slots for a date that's already in the past (section 56)", () => {
+    // No maxBookingDays/minBookingNotice trickery needed to reject this on
+    // its own — "now" being after the entire working window is what
+    // filters every candidate out, the same mechanism minimum notice uses.
+    const pastDate = DateTime.fromISO(DATE, { zone: ZONE }).minus({ days: 5 }).toISODate()!;
+    const workingHours: WorkingHours[] = [
+      { dayOfWeek: DateTime.fromISO(pastDate, { zone: ZONE }).weekday % 7, startTime: "10:00", endTime: "18:00", isWorking: true },
+    ];
+    const slots = getAvailableSlots(
+      baseInput({ date: pastDate, workingHours, now: localTime(8) })
+    );
+    expect(slots).toEqual([]);
+  });
+
   it("respects the minimum booking notice", () => {
     const slots = getAvailableSlots(
       baseInput({
