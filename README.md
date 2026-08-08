@@ -252,21 +252,21 @@ To test the Telegram side locally, the webhook needs a public HTTPS URL. A quick
 
 ## Deployment
 
-Intended target: **Vercel** (Next.js app) + a **Supabase Cloud** project (Postgres/Auth), with the Telegram webhook pointed at the deployed URL:
+**Live:** [project-specification-eta.vercel.app](https://project-specification-eta.vercel.app) (Vercel) + Supabase Cloud (Postgres/Auth), with the Telegram webhook pointed at the deployed URL:
 
 ```
 Telegram → Telegram Bot API → Vercel (Next.js) → Supabase (Postgres)
 Browser  →                    Vercel (Next.js) → Supabase (Postgres)
 ```
 
-Rough steps once a Supabase Cloud project exists:
+Steps to reproduce this deployment against a fresh Supabase Cloud project:
 
-1. `pnpm exec supabase link --project-ref <ref>` then `pnpm exec supabase db push` to apply migrations + seed
-2. Deploy to Vercel with the environment variables above set to the Cloud project's values
+1. `pnpm exec supabase link --project-ref <ref>` then `pnpm exec supabase db push` to apply migrations, then apply `supabase/seed.sql` against the same connection string
+2. Deploy to Vercel (`vercel link`, `vercel env add <name> production --value ...` for each variable above, `vercel deploy --prod`)
 3. Register the webhook: `POST https://api.telegram.org/bot<TOKEN>/setWebhook` with `url` pointing at `https://<your-domain>/api/telegram/webhook` and the same `secret_token` as `TELEGRAM_WEBHOOK_SECRET`
 4. Run `scripts/create-admin.mjs` against the production environment to create the real admin account
 
-This project hasn't been pushed to a production deployment yet — everything above has been built and verified against a local Supabase instance.
+One gotcha hit along the way: Supabase's direct database host (`db.<ref>.supabase.co:5432`) failed to complete the Postgres handshake from this particular network (TCP connected, but the connection was reset immediately after — likely a VPN/proxy on the network mishandling the raw Postgres wire protocol). The [connection pooler](https://supabase.com/docs/guides/database/connecting-to-postgres#connection-pooler) (`aws-*.pooler.supabase.com:5432`, fetched via the Management API rather than guessed) worked without issue and is what migrations were actually pushed through.
 
 ---
 
