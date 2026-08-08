@@ -26,13 +26,13 @@ export function CalendarDaysColumns({
         return (
           <div
             key={dateKey}
-            className={`rounded-lg border bg-white p-3 ${isToday ? "border-gray-900" : "border-gray-200"}`}
+            className={`rounded-lg border bg-card p-3 ${isToday ? "border-accent-solid" : "border-border"}`}
           >
-            <div className="mb-2 text-xs font-medium text-gray-500">
+            <div className="mb-2 text-xs font-medium text-foreground-secondary">
               {day.setLocale("ru").toFormat("ccc, d MMM")}
             </div>
             {bookings.length === 0 ? (
-              <p className="text-xs text-gray-400">Нет записей</p>
+              <p className="text-xs text-foreground-secondary">Нет записей</p>
             ) : (
               <div className="space-y-1">
                 {bookings.map((booking) => (

@@ -1,11 +1,14 @@
 // Section 46: every status must be visually distinct without using an
 // excessive number of colors — five statuses, five colors, that's it.
+// Colors come from CSS variables (globals.css) with separate light/dark
+// values, rather than literal Tailwind palette classes, so they stay
+// legible against a near-black background too.
 const STATUS_STYLES: Record<string, string> = {
-  PENDING: "bg-amber-100 text-amber-800",
-  CONFIRMED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800",
-  COMPLETED: "bg-blue-100 text-blue-800",
-  NO_SHOW: "bg-gray-200 text-gray-700",
+  PENDING: "bg-status-pending-bg text-status-pending-text",
+  CONFIRMED: "bg-status-confirmed-bg text-status-confirmed-text",
+  CANCELLED: "bg-status-cancelled-bg text-status-cancelled-text",
+  COMPLETED: "bg-status-completed-bg text-status-completed-text",
+  NO_SHOW: "bg-status-noshow-bg text-status-noshow-text",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -17,7 +20,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
-  const style = STATUS_STYLES[status] ?? "bg-gray-100 text-gray-700";
+  const style = STATUS_STYLES[status] ?? "bg-background-secondary text-foreground";
   const label = STATUS_LABELS[status] ?? status;
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${style}`}>

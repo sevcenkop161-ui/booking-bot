@@ -12,7 +12,7 @@ const UPCOMING_LIMIT = 8;
 export default async function DashboardPage() {
   const supabase = await createClient();
   const business = await getPrimaryBusiness(supabase);
-  if (!business) return <p className="text-gray-500">Бизнес не найден.</p>;
+  if (!business) return <p className="text-foreground-secondary">Бизнес не найден.</p>;
 
   const [stats, upcoming] = await Promise.all([
     getOverviewStats(supabase, business.id, business.timezone),
@@ -21,10 +21,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-gray-900">Overview</h1>
+      <h1 className="text-lg font-semibold text-foreground">Overview</h1>
 
       <div>
-        <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Сегодня</h2>
+        <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground-secondary">Сегодня</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatsCard label="Всего записей" value={stats.today.total} />
           <StatsCard label="Подтверждено" value={stats.today.confirmed} />
@@ -39,25 +39,25 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="rounded-lg border border-gray-200 bg-white lg:col-span-2">
-          <div className="border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-900">
+        <div className="rounded-lg border border-border bg-card lg:col-span-2">
+          <div className="border-b border-border px-4 py-3 text-sm font-semibold text-foreground">
             Ближайшие записи
           </div>
           {upcoming.length === 0 ? (
-            <p className="p-4 text-sm text-gray-500">Нет предстоящих записей.</p>
+            <p className="p-4 text-sm text-foreground-secondary">Нет предстоящих записей.</p>
           ) : (
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-border">
               {upcoming.map((booking) => (
                 <li key={booking.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                   <Link href={`/dashboard/bookings/${booking.id}`} className="min-w-0 flex-1 hover:underline">
-                    <div className="truncate font-medium text-gray-900">
+                    <div className="truncate font-medium text-foreground">
                       {DateTime.fromISO(booking.start_time, { zone: business.timezone })
                         .setLocale("ru")
                         .toFormat("d MMM, HH:mm")}
                       {" — "}
                       {booking.client.first_name ?? "Клиент"}
                     </div>
-                    <div className="truncate text-xs text-gray-500">
+                    <div className="truncate text-xs text-foreground-secondary">
                       {booking.service.name} · {booking.artist.name}
                     </div>
                   </Link>
@@ -69,32 +69,32 @@ export default async function DashboardPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold text-gray-900">Популярные услуги</h2>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Популярные услуги</h2>
             {stats.popularServices.length === 0 ? (
-              <p className="text-sm text-gray-500">Пока нет данных.</p>
+              <p className="text-sm text-foreground-secondary">Пока нет данных.</p>
             ) : (
               <ul className="space-y-2 text-sm">
                 {stats.popularServices.map((service) => (
                   <li key={service.name} className="flex items-center justify-between">
-                    <span className="text-gray-700">{service.name}</span>
-                    <span className="font-medium text-gray-900">{service.count}</span>
+                    <span className="text-foreground">{service.name}</span>
+                    <span className="font-medium text-foreground">{service.count}</span>
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h2 className="mb-3 text-sm font-semibold text-gray-900">Загрузка мастеров</h2>
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h2 className="mb-3 text-sm font-semibold text-foreground">Загрузка мастеров</h2>
             {stats.artistLoad.length === 0 ? (
-              <p className="text-sm text-gray-500">Пока нет данных.</p>
+              <p className="text-sm text-foreground-secondary">Пока нет данных.</p>
             ) : (
               <ul className="space-y-2 text-sm">
                 {stats.artistLoad.map((artist) => (
                   <li key={artist.name} className="flex items-center justify-between">
-                    <span className="text-gray-700">{artist.name}</span>
-                    <span className="font-medium text-gray-900">{artist.count}</span>
+                    <span className="text-foreground">{artist.name}</span>
+                    <span className="font-medium text-foreground">{artist.count}</span>
                   </li>
                 ))}
               </ul>

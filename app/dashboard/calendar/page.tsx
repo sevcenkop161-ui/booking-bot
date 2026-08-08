@@ -20,7 +20,7 @@ export default async function CalendarPage({
   const supabase = await createClient();
   const business = await getPrimaryBusiness(supabase);
   if (!business) {
-    return <p className="text-gray-500">Бизнес не найден.</p>;
+    return <p className="text-foreground-secondary">Бизнес не найден.</p>;
   }
 
   const view: CalendarView = isView(params.view) ? params.view : "week";
@@ -47,7 +47,7 @@ export default async function CalendarPage({
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-gray-900">Календарь</h1>
+      <h1 className="text-lg font-semibold text-foreground">Календарь</h1>
       <CalendarNav view={view} anchor={anchor} today={today} />
       {view === "month" ? (
         <CalendarMonthGrid

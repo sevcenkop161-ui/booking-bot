@@ -12,24 +12,24 @@ export default async function ArtistsPage({
   const { error } = await searchParams;
   const supabase = await createClient();
   const business = await getPrimaryBusiness(supabase);
-  if (!business) return <p className="text-gray-500">Бизнес не найден.</p>;
+  if (!business) return <p className="text-foreground-secondary">Бизнес не найден.</p>;
 
   const artists = await getArtists(supabase, business.id);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-gray-900">Мастера</h1>
+        <h1 className="text-lg font-semibold text-foreground">Мастера</h1>
         <Link
           href="/dashboard/artists/new"
-          className="rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-gray-700"
+          className="rounded-md bg-accent-solid px-3 py-1.5 text-sm text-white hover:bg-accent-solid-hover"
         >
           + Добавить мастера
         </Link>
       </div>
 
       {error && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-md bg-status-cancelled-bg px-3 py-2 text-sm text-status-cancelled-text">
           {error === "cannot_delete"
             ? "Нельзя удалить — у мастера уже есть записи. Отключите его вместо удаления."
             : "Не удалось выполнить действие."}
@@ -37,13 +37,13 @@ export default async function ArtistsPage({
       )}
 
       {artists.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
+        <div className="rounded-lg border border-dashed border-border p-8 text-center text-foreground-secondary">
           Мастеров пока нет.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+        <div className="overflow-x-auto rounded-lg border border-border bg-card">
+          <table className="min-w-full divide-y divide-border text-sm">
+            <thead className="bg-background-secondary text-left text-xs font-medium uppercase tracking-wide text-foreground-secondary">
               <tr>
                 <th className="px-4 py-3">Имя</th>
                 <th className="px-4 py-3">Специализация</th>
@@ -51,15 +51,15 @@ export default async function ArtistsPage({
                 <th className="px-4 py-3">Действия</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {artists.map((artist) => (
                 <tr key={artist.id}>
-                  <td className="px-4 py-3 font-medium text-gray-900">{artist.name}</td>
-                  <td className="px-4 py-3 text-gray-700">{artist.specialization ?? "—"}</td>
+                  <td className="px-4 py-3 font-medium text-foreground">{artist.name}</td>
+                  <td className="px-4 py-3 text-foreground">{artist.specialization ?? "—"}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        artist.active ? "bg-green-100 text-green-800" : "bg-gray-200 text-gray-600"
+                        artist.active ? "bg-status-confirmed-bg text-status-confirmed-text" : "bg-background-secondary text-foreground-secondary"
                       }`}
                     >
                       {artist.active ? "Активен" : "Отключён"}
@@ -69,14 +69,14 @@ export default async function ArtistsPage({
                     <div className="flex flex-wrap gap-2">
                       <Link
                         href={`/dashboard/artists/${artist.id}/edit`}
-                        className="rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
+                        className="rounded-md border border-border px-2 py-1 text-xs text-foreground hover:bg-background-secondary"
                       >
                         Редактировать
                       </Link>
                       <form action={setArtistActiveAction.bind(null, artist.id, !artist.active)}>
                         <button
                           type="submit"
-                          className="rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
+                          className="rounded-md border border-border px-2 py-1 text-xs text-foreground hover:bg-background-secondary"
                         >
                           {artist.active ? "Отключить" : "Включить"}
                         </button>
@@ -84,7 +84,7 @@ export default async function ArtistsPage({
                       <form action={deleteArtistAction.bind(null, artist.id)}>
                         <button
                           type="submit"
-                          className="rounded-md border border-red-300 px-2 py-1 text-xs text-red-700 hover:bg-red-50"
+                          className="rounded-md border border-status-cancelled-text px-2 py-1 text-xs text-status-cancelled-text hover:bg-status-cancelled-bg"
                         >
                           Удалить
                         </button>

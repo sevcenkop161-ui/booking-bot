@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,15 +31,18 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <main className="relative flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-8 shadow-sm"
+        className="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-sm"
       >
-        <h1 className="mb-1 text-xl font-semibold text-gray-900">Booking Bot Admin</h1>
-        <p className="mb-6 text-sm text-gray-500">Войдите, чтобы открыть панель управления.</p>
+        <h1 className="mb-1 font-display text-2xl font-semibold text-foreground">Booking Bot Admin</h1>
+        <p className="mb-6 text-sm text-foreground-secondary">Войдите, чтобы открыть панель управления.</p>
 
-        <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="email">
+        <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="email">
           Email
         </label>
         <input
@@ -48,10 +52,10 @@ export default function LoginPage() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+          className="mb-4 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
         />
 
-        <label className="mb-1 block text-sm font-medium text-gray-700" htmlFor="password">
+        <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="password">
           Пароль
         </label>
         <input
@@ -61,15 +65,15 @@ export default function LoginPage() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+          className="mb-4 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
         />
 
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+        {error && <p className="mb-4 text-sm text-status-cancelled-text">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
+          className="w-full rounded-md bg-accent-solid px-3 py-2 text-sm font-medium text-white hover:bg-accent-solid-hover disabled:opacity-50"
         >
           {loading ? "Входим…" : "Войти"}
         </button>

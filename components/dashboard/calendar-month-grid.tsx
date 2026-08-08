@@ -19,8 +19,8 @@ export function CalendarMonthGrid({
   currentMonth: number;
 }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
-      <div className="grid min-w-[700px] grid-cols-7 gap-px bg-gray-200 text-sm">
+    <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="grid min-w-[700px] grid-cols-7 gap-px bg-border text-sm">
       {days.map((day) => {
         const dateKey = day.toISODate()!;
         const bookings = bookingsByDate.get(dateKey) ?? [];
@@ -28,15 +28,15 @@ export function CalendarMonthGrid({
         const isOtherMonth = day.month !== currentMonth;
 
         return (
-          <div key={dateKey} className={`min-h-[110px] bg-white p-2 ${isOtherMonth ? "bg-gray-50" : ""}`}>
+          <div key={dateKey} className={`min-h-[110px] bg-card p-2 ${isOtherMonth ? "bg-background-secondary" : ""}`}>
             <Link
               href={`/dashboard/calendar?view=day&date=${dateKey}`}
               className={`inline-block text-xs font-medium ${
                 isToday
-                  ? "rounded-full bg-gray-900 px-1.5 py-0.5 text-white"
+                  ? "rounded-full bg-accent-solid px-1.5 py-0.5 text-white"
                   : isOtherMonth
-                    ? "text-gray-400"
-                    : "text-gray-700"
+                    ? "text-foreground-secondary"
+                    : "text-foreground"
               }`}
             >
               {day.day}
@@ -48,7 +48,7 @@ export function CalendarMonthGrid({
               {bookings.length > MAX_VISIBLE && (
                 <Link
                   href={`/dashboard/calendar?view=day&date=${dateKey}`}
-                  className="block px-1.5 text-xs text-gray-500 hover:underline"
+                  className="block px-1.5 text-xs text-foreground-secondary hover:underline"
                 >
                   +{bookings.length - MAX_VISIBLE} ещё
                 </Link>

@@ -40,26 +40,26 @@ export default async function BookingDetailsPage({
 
   return (
     <div className="max-w-xl space-y-4">
-      <Link href="/dashboard/bookings" className="text-sm text-gray-500 hover:underline">
+      <Link href="/dashboard/bookings" className="text-sm text-foreground-secondary hover:underline">
         ← Все записи
       </Link>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-border bg-card p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-900">Запись</h1>
+          <h1 className="text-lg font-semibold text-foreground">Запись</h1>
           <StatusBadge status={booking.status} />
         </div>
 
-        <dl className="divide-y divide-gray-100 text-sm">
+        <dl className="divide-y divide-border text-sm">
           {rows.map(([label, value]) => (
             <div key={label} className="flex justify-between gap-4 py-2">
-              <dt className="text-gray-500">{label}</dt>
-              <dd className="text-right text-gray-900">{value}</dd>
+              <dt className="text-foreground-secondary">{label}</dt>
+              <dd className="text-right text-foreground">{value}</dd>
             </div>
           ))}
         </dl>
 
-        <div className="mt-4 border-t border-gray-100 pt-4">
+        <div className="mt-4 border-t border-border pt-4">
           <BookingActions bookingId={booking.id} status={booking.status} size="md" />
         </div>
       </div>

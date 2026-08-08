@@ -15,12 +15,12 @@ export default async function SchedulePage({
   const params = await searchParams;
   const supabase = await createClient();
   const business = await getPrimaryBusiness(supabase);
-  if (!business) return <p className="text-gray-500">Бизнес не найден.</p>;
+  if (!business) return <p className="text-foreground-secondary">Бизнес не найден.</p>;
 
   const artists = await getArtists(supabase, business.id);
   if (artists.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
+      <div className="rounded-lg border border-dashed border-border p-8 text-center text-foreground-secondary">
         Сначала добавьте мастера на странице «Artists».
       </div>
     );
@@ -35,7 +35,7 @@ export default async function SchedulePage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-lg font-semibold text-gray-900">Расписание</h1>
+      <h1 className="text-lg font-semibold text-foreground">Расписание</h1>
 
       <div className="flex flex-wrap gap-2">
         {artists.map((artist) => (
@@ -44,8 +44,8 @@ export default async function SchedulePage({
             href={`/dashboard/schedule?artist=${artist.id}`}
             className={`rounded-full px-3 py-1 text-xs font-medium ${
               artist.id === activeArtistId
-                ? "bg-gray-900 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-accent-solid text-white"
+                : "bg-background-secondary text-foreground hover:bg-border"
             }`}
           >
             {artist.name}

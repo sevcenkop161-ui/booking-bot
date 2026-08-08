@@ -32,10 +32,10 @@ export function ScheduleWeekForm({
   const [state, formAction, pending] = useActionState(action, { values: initialValues });
 
   return (
-    <form key={artistId} action={formAction} className="rounded-lg border border-gray-200 bg-white p-4">
+    <form key={artistId} action={formAction} className="rounded-lg border border-border bg-card p-4">
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
-          <thead className="text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+          <thead className="text-left text-xs font-medium uppercase tracking-wide text-foreground-secondary">
             <tr>
               <th className="py-2 pr-4">День</th>
               <th className="py-2 pr-4">Рабочий</th>
@@ -45,12 +45,12 @@ export function ScheduleWeekForm({
               <th className="py-2 pr-4">до</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border">
             {DISPLAY_ORDER.map((dayOfWeek) => {
               const day = state.values.find((d) => d.dayOfWeek === dayOfWeek)!;
               return (
                 <tr key={dayOfWeek}>
-                  <td className="py-2 pr-4 font-medium text-gray-900">{DAY_LABELS[dayOfWeek]}</td>
+                  <td className="py-2 pr-4 font-medium text-foreground">{DAY_LABELS[dayOfWeek]}</td>
                   <td className="py-2 pr-4">
                     <input
                       type="checkbox"
@@ -97,13 +97,13 @@ export function ScheduleWeekForm({
         </table>
       </div>
 
-      {state.error && <p className="mt-3 text-sm text-red-600">{state.error}</p>}
-      {state.success && !state.error && <p className="mt-3 text-sm text-green-600">Сохранено ✓</p>}
+      {state.error && <p className="mt-3 text-sm text-status-cancelled-text">{state.error}</p>}
+      {state.success && !state.error && <p className="mt-3 text-sm text-status-confirmed-text">Сохранено ✓</p>}
 
       <button
         type="submit"
         disabled={pending}
-        className="mt-4 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
+        className="mt-4 rounded-md bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent-solid-hover disabled:opacity-50"
       >
         {pending ? "Сохраняем…" : "Сохранить расписание"}
       </button>

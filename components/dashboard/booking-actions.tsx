@@ -21,7 +21,7 @@ export function BookingActions({
         <form key={action.status} action={updateBookingStatus.bind(null, bookingId, action.status)}>
           <button
             type="submit"
-            className={`rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 ${sizeClass}`}
+            className={`rounded-md border border-border text-foreground hover:bg-background-secondary ${sizeClass}`}
           >
             {action.label}
           </button>

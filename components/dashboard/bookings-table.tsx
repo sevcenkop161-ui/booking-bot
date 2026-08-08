@@ -13,16 +13,16 @@ export function BookingsTable({
 }) {
   if (bookings.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
+      <div className="rounded-lg border border-dashed border-border p-8 text-center text-foreground-secondary">
         Записей не найдено.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+    <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <table className="min-w-full divide-y divide-border text-sm">
+        <thead className="bg-background-secondary text-left text-xs font-medium uppercase tracking-wide text-foreground-secondary">
           <tr>
             <th className="px-4 py-3">Дата и время</th>
             <th className="px-4 py-3">Клиент</th>
@@ -32,10 +32,10 @@ export function BookingsTable({
             <th className="px-4 py-3">Действия</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-border">
           {bookings.map((booking) => (
             <tr key={booking.id}>
-              <td className="whitespace-nowrap px-4 py-3 text-gray-900">
+              <td className="whitespace-nowrap px-4 py-3 text-foreground">
                 <Link href={`/dashboard/bookings/${booking.id}`} className="hover:underline">
                   {DateTime.fromISO(booking.start_time, { zone: timezone })
                     .setLocale("ru")
@@ -43,13 +43,13 @@ export function BookingsTable({
                 </Link>
               </td>
               <td className="px-4 py-3">
-                <div className="font-medium text-gray-900">{booking.client.first_name ?? "—"}</div>
-                <div className="text-xs text-gray-500">
+                <div className="font-medium text-foreground">{booking.client.first_name ?? "—"}</div>
+                <div className="text-xs text-foreground-secondary">
                   {booking.client.phone ?? (booking.client.username ? `@${booking.client.username}` : "")}
                 </div>
               </td>
-              <td className="px-4 py-3 text-gray-700">{booking.service.name}</td>
-              <td className="px-4 py-3 text-gray-700">{booking.artist.name}</td>
+              <td className="px-4 py-3 text-foreground">{booking.service.name}</td>
+              <td className="px-4 py-3 text-foreground">{booking.artist.name}</td>
               <td className="px-4 py-3">
                 <StatusBadge status={booking.status} />
               </td>

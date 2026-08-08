@@ -18,7 +18,7 @@ export function ArtistForm({
   const [state, formAction, pending] = useActionState(action, { values: initialValues });
 
   return (
-    <form action={formAction} className="max-w-lg rounded-lg border border-gray-200 bg-white p-6">
+    <form action={formAction} className="max-w-lg rounded-lg border border-border bg-card p-6">
       <FormField label="Имя" name="name">
         <input id="name" name="name" required defaultValue={state.values.name} className={INPUT_CLASS} />
       </FormField>
@@ -48,11 +48,11 @@ export function ArtistForm({
 
       <FormField label="Услуги" name="service_ids">
         {allServices.length === 0 ? (
-          <p className="text-sm text-gray-500">Сначала добавьте хотя бы одну услугу.</p>
+          <p className="text-sm text-foreground-secondary">Сначала добавьте хотя бы одну услугу.</p>
         ) : (
           <div className="space-y-1">
             {allServices.map((service) => (
-              <label key={service.id} className="flex items-center gap-2 text-sm text-gray-700">
+              <label key={service.id} className="flex items-center gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
                   name="service_ids"
@@ -66,17 +66,17 @@ export function ArtistForm({
         )}
       </FormField>
 
-      <label className="mb-4 mt-2 flex items-center gap-2 text-sm text-gray-700">
+      <label className="mb-4 mt-2 flex items-center gap-2 text-sm text-foreground">
         <input type="checkbox" name="active" defaultChecked={state.values.active} />
         Активен (доступен для записи)
       </label>
 
-      {state.error && <p className="mb-4 text-sm text-red-600">{state.error}</p>}
+      {state.error && <p className="mb-4 text-sm text-status-cancelled-text">{state.error}</p>}
 
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
+        className="rounded-md bg-accent-solid px-4 py-2 text-sm font-medium text-white hover:bg-accent-solid-hover disabled:opacity-50"
       >
         {pending ? "Сохраняем…" : submitLabel}
       </button>

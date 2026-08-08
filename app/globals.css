@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f9fafb;
+  --background-secondary: #f3f4f6;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --border-hover: #d1d5db;
+
+  --foreground: #111827;
+  --foreground-secondary: #6b7280;
+
+  /* Accent taken from the Ink Studio project's palette, for a
+     consistent look across both portfolio pieces. */
+  --accent: #9466f7;
+  --accent-hover: #a78bfa;
+  --accent-solid: #7d3fee;
+  --accent-solid-hover: #8347f0;
+
+  --status-pending-bg: #fef3c7;
+  --status-pending-text: #92400e;
+  --status-confirmed-bg: #dcfce7;
+  --status-confirmed-text: #166534;
+  --status-cancelled-bg: #fee2e2;
+  --status-cancelled-text: #991b1b;
+  --status-completed-bg: #dbeafe;
+  --status-completed-text: #1e40af;
+  --status-noshow-bg: #e5e7eb;
+  --status-noshow-text: #374151;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #050505;
+    --background-secondary: #0b0b0b;
+    --card: #111111;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.16);
+
+    --foreground: #f5f5f5;
+    --foreground-secondary: #a1a1aa;
+
+    --status-pending-bg: rgba(245, 158, 11, 0.15);
+    --status-pending-text: #fbbf24;
+    --status-confirmed-bg: rgba(34, 197, 94, 0.15);
+    --status-confirmed-text: #4ade80;
+    --status-cancelled-bg: rgba(239, 68, 68, 0.15);
+    --status-cancelled-text: #f87171;
+    --status-completed-bg: rgba(59, 130, 246, 0.15);
+    --status-completed-text: #60a5fa;
+    --status-noshow-bg: rgba(255, 255, 255, 0.08);
+    --status-noshow-text: #d1d5db;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #050505;
+  --background-secondary: #0b0b0b;
+  --card: #111111;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+
+  --foreground: #f5f5f5;
+  --foreground-secondary: #a1a1aa;
+
+  --status-pending-bg: rgba(245, 158, 11, 0.15);
+  --status-pending-text: #fbbf24;
+  --status-confirmed-bg: rgba(34, 197, 94, 0.15);
+  --status-confirmed-text: #4ade80;
+  --status-cancelled-bg: rgba(239, 68, 68, 0.15);
+  --status-cancelled-text: #f87171;
+  --status-completed-bg: rgba(59, 130, 246, 0.15);
+  --status-completed-text: #60a5fa;
+  --status-noshow-bg: rgba(255, 255, 255, 0.08);
+  --status-noshow-text: #d1d5db;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-background-secondary: var(--background-secondary);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-solid: var(--accent-solid);
+  --color-accent-solid-hover: var(--accent-solid-hover);
+
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-pending-text: var(--status-pending-text);
+  --color-status-confirmed-bg: var(--status-confirmed-bg);
+  --color-status-confirmed-text: var(--status-confirmed-text);
+  --color-status-cancelled-bg: var(--status-cancelled-bg);
+  --color-status-cancelled-text: var(--status-cancelled-text);
+  --color-status-completed-bg: var(--status-completed-bg);
+  --color-status-completed-text: var(--status-completed-text);
+  --color-status-noshow-bg: var(--status-noshow-bg);
+  --color-status-noshow-text: var(--status-noshow-text);
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-cormorant);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }

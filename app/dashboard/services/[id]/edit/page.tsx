@@ -16,7 +16,7 @@ export default async function EditServicePage({ params }: { params: Promise<{ id
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-gray-900">Редактировать услугу</h1>
+      <h1 className="text-lg font-semibold text-foreground">Редактировать услугу</h1>
       <ServiceForm
         action={updateServiceAction.bind(null, id)}
         initialValues={{

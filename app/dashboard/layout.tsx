@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 // Grows as each section is built — no point linking to pages that don't
 // exist yet.
@@ -35,27 +36,31 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const businessName = (admin.businesses as unknown as { name: string } | null)?.name ?? "—";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card px-4 py-3 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-            <span className="text-sm font-medium text-gray-900">{businessName}</span>
+            <span className="flex items-center gap-2 font-display text-base font-semibold text-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-solid" aria-hidden />
+              {businessName}
+            </span>
             <nav className="flex gap-4 overflow-x-auto">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="whitespace-nowrap text-sm text-gray-600 hover:text-gray-900"
+                  className="whitespace-nowrap text-sm text-foreground-secondary hover:text-accent"
                 >
                   {item.label}
                 </Link>
               ))}
             </nav>
           </div>
-          <div className="flex items-center gap-3 text-sm text-gray-600">
+          <div className="flex items-center gap-3 text-sm text-foreground-secondary">
             <span className="hidden sm:inline">
               {user.email} · {admin.role}
             </span>
+            <ThemeToggle />
             <LogoutButton />
           </div>
         </div>
