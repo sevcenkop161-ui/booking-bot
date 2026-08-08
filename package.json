@@ -10,6 +10,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.2",
+    "grammy": "^1.45.1",
     "luxon": "^3.7.2",
     "next": "16.3.0",
     "react": "19.2.8",
