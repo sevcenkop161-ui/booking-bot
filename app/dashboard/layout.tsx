@@ -1,6 +1,14 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
+
+// Grows as each section is built — no point linking to pages that don't
+// exist yet.
+const NAV_ITEMS = [
+  { href: "/dashboard", label: "Overview" },
+  { href: "/dashboard/bookings", label: "Bookings" },
+];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -25,7 +33,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-3">
-        <div className="text-sm font-medium text-gray-900">{businessName}</div>
+        <div className="flex items-center gap-6">
+          <span className="text-sm font-medium text-gray-900">{businessName}</span>
+          <nav className="flex gap-4">
+            {NAV_ITEMS.map((item) => (
+              <Link key={item.href} href={item.href} className="text-sm text-gray-600 hover:text-gray-900">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
         <div className="flex items-center gap-3 text-sm text-gray-600">
           <span>
             {user.email} · {admin.role}
