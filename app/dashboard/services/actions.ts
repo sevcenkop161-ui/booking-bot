@@ -2,8 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { getPrimaryBusiness } from "@/lib/business";
+import { requireAdmin } from "@/lib/dashboard/require-admin";
 import { serviceSchema } from "@/lib/validation/services";
 import * as services from "@/lib/dashboard/services";
 
@@ -42,9 +41,7 @@ export async function createServiceAction(
     return { error: parsed.error.issues[0].message, values };
   }
 
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) return { error: "Бизнес не найден.", values };
+  const { supabase, business } = await requireAdmin();
 
   try {
     await services.createService(supabase, business.id, parsed.data);
@@ -68,9 +65,7 @@ export async function updateServiceAction(
     return { error: parsed.error.issues[0].message, values };
   }
 
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) return { error: "Бизнес не найден.", values };
+  const { supabase, business } = await requireAdmin();
 
   try {
     await services.updateService(supabase, business.id, id, parsed.data);
@@ -84,18 +79,13 @@ export async function updateServiceAction(
 }
 
 export async function setServiceActiveAction(id: string, active: boolean): Promise<void> {
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) return;
-
+  const { supabase, business } = await requireAdmin();
   await services.setServiceActive(supabase, business.id, id, active);
   revalidatePath("/dashboard/services");
 }
 
 export async function deleteServiceAction(id: string): Promise<void> {
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) redirect("/dashboard/services");
+  const { supabase, business } = await requireAdmin();
 
   try {
     await services.deleteService(supabase, business.id, id);

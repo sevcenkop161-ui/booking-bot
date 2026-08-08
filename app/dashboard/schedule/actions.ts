@@ -2,8 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { getPrimaryBusiness } from "@/lib/business";
+import { requireAdmin } from "@/lib/dashboard/require-admin";
 import { weekScheduleSchema, timeOffSchema } from "@/lib/validation/schedule";
 import * as schedule from "@/lib/dashboard/schedule";
 
@@ -58,9 +57,7 @@ export async function saveScheduleAction(
     return { error: dayLabel ? `${dayLabel}: ${issue.message}` : issue.message, values };
   }
 
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) return { error: "Бизнес не найден.", values };
+  const { supabase, business } = await requireAdmin();
 
   try {
     await schedule.saveArtistWeekSchedule(supabase, business.id, artistId, parsed.data);
@@ -81,9 +78,8 @@ export async function addTimeOffAction(artistId: string, formData: FormData): Pr
   };
   const parsed = timeOffSchema.safeParse(raw);
 
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business || !parsed.success) {
+  const { supabase, business } = await requireAdmin();
+  if (!parsed.success) {
     redirect(`/dashboard/schedule?artist=${artistId}&error=invalid_time_off`);
   }
 
@@ -93,7 +89,7 @@ export async function addTimeOffAction(artistId: string, formData: FormData): Pr
 }
 
 export async function deleteTimeOffAction(artistId: string, id: string): Promise<void> {
-  const supabase = await createClient();
+  const { supabase } = await requireAdmin();
   await schedule.deleteTimeOff(supabase, id);
   revalidatePath("/dashboard/schedule");
   redirect(`/dashboard/schedule?artist=${artistId}`);

@@ -2,8 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { getPrimaryBusiness } from "@/lib/business";
+import { requireAdmin } from "@/lib/dashboard/require-admin";
 import { artistSchema } from "@/lib/validation/artists";
 import * as artists from "@/lib/dashboard/artists";
 
@@ -44,9 +43,7 @@ export async function createArtistAction(
     return { error: parsed.error.issues[0].message, values };
   }
 
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) return { error: "Бизнес не найден.", values };
+  const { supabase, business } = await requireAdmin();
 
   try {
     await artists.createArtist(supabase, business.id, parsed.data);
@@ -70,9 +67,7 @@ export async function updateArtistAction(
     return { error: parsed.error.issues[0].message, values };
   }
 
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) return { error: "Бизнес не найден.", values };
+  const { supabase, business } = await requireAdmin();
 
   try {
     await artists.updateArtist(supabase, business.id, id, parsed.data);
@@ -86,18 +81,13 @@ export async function updateArtistAction(
 }
 
 export async function setArtistActiveAction(id: string, active: boolean): Promise<void> {
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) return;
-
+  const { supabase, business } = await requireAdmin();
   await artists.setArtistActive(supabase, business.id, id, active);
   revalidatePath("/dashboard/artists");
 }
 
 export async function deleteArtistAction(id: string): Promise<void> {
-  const supabase = await createClient();
-  const business = await getPrimaryBusiness(supabase);
-  if (!business) redirect("/dashboard/artists");
+  const { supabase, business } = await requireAdmin();
 
   try {
     await artists.deleteArtist(supabase, business.id, id);
