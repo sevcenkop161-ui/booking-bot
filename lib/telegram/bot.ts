@@ -119,13 +119,17 @@ bot.hears(MENU_LABELS.artists, async (ctx) => {
   await ctx.reply(formatArtistList(artists), { parse_mode: "HTML" });
 });
 
-registerBookingFlow(bot);
-
 // "My bookings" is built in a later phase — this just confirms the
 // button is wired up end to end.
 bot.hears(MENU_LABELS.myBookings, async (ctx) => {
   await ctx.reply("Этот раздел ещё в разработке — совсем скоро здесь можно будет посмотреть свои записи 🙂");
 });
+
+// Registered last: it installs a catch-all bot.on("message:text") handler
+// for collecting name/phone/comment, which must run after every other
+// exact-text bot.hears() above so menu button presses are never
+// swallowed as booking-flow input.
+registerBookingFlow(bot);
 
 bot.catch((err) => {
   console.error("Telegram bot error:", err);
