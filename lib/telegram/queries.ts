@@ -206,6 +206,113 @@ export async function getActiveArtists(
   return data;
 }
 
+export async function getUserIdByTelegramId(
+  supabase: SupabaseClient,
+  telegramId: number
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("users")
+    .select("id")
+    .eq("telegram_id", telegramId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+export async function getCancellationDeadlineHours(
+  supabase: SupabaseClient,
+  businessId: string
+): Promise<number> {
+  const { data } = await supabase
+    .from("business_settings")
+    .select("cancellation_hours")
+    .eq("business_id", businessId)
+    .single();
+  return data?.cancellation_hours ?? 24;
+}
+
+export interface UserBooking {
+  id: string;
+  status: string;
+  date: string;
+  start_time: string;
+  service: { name: string };
+  artist: { name: string };
+}
+
+function mapUserBookingRow(row: {
+  id: string;
+  status: string;
+  date: string;
+  start_time: string;
+  services: { name: string } | null;
+  artists: { name: string } | null;
+}): UserBooking | null {
+  if (!row.services || !row.artists) return null;
+  return {
+    id: row.id,
+    status: row.status,
+    date: row.date,
+    start_time: row.start_time,
+    service: row.services,
+    artist: row.artists,
+  };
+}
+
+const USER_BOOKING_SELECT = "id, status, date, start_time, services(name), artists(name)";
+
+export async function getUpcomingBookingsForUser(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<UserBooking[]> {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(USER_BOOKING_SELECT)
+    .eq("user_id", userId)
+    .in("status", ["PENDING", "CONFIRMED"])
+    .gt("start_time", new Date().toISOString())
+    .order("start_time", { ascending: true });
+  if (error) throw error;
+  return (data as unknown as Parameters<typeof mapUserBookingRow>[0][])
+    .map(mapUserBookingRow)
+    .filter((b): b is UserBooking => b !== null);
+}
+
+export async function getPastBookingsForUser(
+  supabase: SupabaseClient,
+  userId: string,
+  limit: number
+): Promise<UserBooking[]> {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(USER_BOOKING_SELECT)
+    .eq("user_id", userId)
+    .or(`status.in.(CANCELLED,COMPLETED,NO_SHOW),start_time.lte.${new Date().toISOString()}`)
+    .order("start_time", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data as unknown as Parameters<typeof mapUserBookingRow>[0][])
+    .map(mapUserBookingRow)
+    .filter((b): b is UserBooking => b !== null);
+}
+
+// Fetches a booking only if it belongs to this user — the ownership
+// check IS the query, so it's impossible to use this to look up (or
+// later cancel) someone else's booking by guessing an id (section 34).
+export async function getOwnedBooking(
+  supabase: SupabaseClient,
+  bookingId: string,
+  userId: string
+): Promise<UserBooking | null> {
+  const { data } = await supabase
+    .from("bookings")
+    .select(USER_BOOKING_SELECT)
+    .eq("id", bookingId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!data) return null;
+  return mapUserBookingRow(data as unknown as Parameters<typeof mapUserBookingRow>[0]);
+}
+
 export interface BookingWithDetails {
   id: string;
   status: string;

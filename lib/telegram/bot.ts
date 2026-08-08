@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service-client";
 import { formatArtistList, formatServiceList } from "@/lib/telegram/formatters";
 import { getActiveArtists, getActiveServices, getPrimaryBusiness } from "@/lib/telegram/queries";
 import { registerBookingFlow } from "@/lib/telegram/booking/handlers";
+import { registerMyBookingsFlow } from "@/lib/telegram/my-bookings";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
@@ -119,11 +120,7 @@ bot.hears(MENU_LABELS.artists, async (ctx) => {
   await ctx.reply(formatArtistList(artists), { parse_mode: "HTML" });
 });
 
-// "My bookings" is built in a later phase — this just confirms the
-// button is wired up end to end.
-bot.hears(MENU_LABELS.myBookings, async (ctx) => {
-  await ctx.reply("Этот раздел ещё в разработке — совсем скоро здесь можно будет посмотреть свои записи 🙂");
-});
+registerMyBookingsFlow(bot);
 
 // Registered last: it installs a catch-all bot.on("message:text") handler
 // for collecting name/phone/comment, which must run after every other

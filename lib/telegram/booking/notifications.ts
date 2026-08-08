@@ -59,6 +59,32 @@ export function registerAdminActions(bot: Bot): void {
   bot.callbackQuery(/^admin_(confirm|reject):(.+)$/, onAdminAction);
 }
 
+// Section 18: the admin should also hear about it when a client cancels
+// their own booking, not just when a new one comes in.
+export async function sendAdminCancellationNotice(api: Api, bookingId: string): Promise<void> {
+  const chatId = adminChatId();
+  if (!chatId) return;
+
+  const supabase = createServiceClient();
+  const [business, booking] = await Promise.all([
+    getPrimaryBusiness(supabase),
+    getBookingWithDetails(supabase, bookingId),
+  ]);
+  if (!business || !booking) return;
+
+  const text = [
+    "❌ Клиент отменил запись",
+    "",
+    `Клиент: ${booking.user.first_name ?? "—"}`,
+    `Услуга: ${booking.service.name}`,
+    `Мастер: ${booking.artist.name}`,
+    `Дата: ${formatFullDate(booking.date, business.timezone)}`,
+    `Время: ${DateTime.fromISO(booking.start_time, { zone: business.timezone }).toFormat("HH:mm")}`,
+  ].join("\n");
+
+  await api.sendMessage(chatId, text);
+}
+
 async function onAdminAction(ctx: Context): Promise<void> {
   const from = ctx.from;
   const match = ctx.match as RegExpMatchArray | undefined;
