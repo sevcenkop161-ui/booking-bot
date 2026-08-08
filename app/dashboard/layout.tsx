@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/bookings", label: "Bookings" },
   { href: "/dashboard/calendar", label: "Calendar" },
   { href: "/dashboard/services", label: "Services" },
+  { href: "/dashboard/artists", label: "Artists" },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
