@@ -144,3 +144,23 @@ export async function getBookingsInRange(
     .map(mapAdminBookingRow)
     .filter((b): b is AdminBookingRow => b !== null);
 }
+
+export async function getUpcomingBookings(
+  supabase: SupabaseClient,
+  businessId: string,
+  limit: number
+): Promise<AdminBookingRow[]> {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(ADMIN_BOOKING_SELECT)
+    .eq("business_id", businessId)
+    .in("status", ["PENDING", "CONFIRMED"])
+    .gt("start_time", new Date().toISOString())
+    .order("start_time", { ascending: true })
+    .limit(limit);
+  if (error) throw error;
+
+  return (data as unknown as RawAdminBookingRow[])
+    .map(mapAdminBookingRow)
+    .filter((b): b is AdminBookingRow => b !== null);
+}
