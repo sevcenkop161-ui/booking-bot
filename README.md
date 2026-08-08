@@ -4,6 +4,8 @@ Telegram booking automation system for small businesses (tattoo studios, barbers
 
 > **Demo / Concept Project.** All business data (studio name, artists, services, client interactions) is fictional, created for portfolio purposes. See [Demo Data](#demo-data).
 
+> 📄 See [PORTFOLIO_CASE.md](PORTFOLIO_CASE.md) for the portfolio-style case study version of this document.
+
 ---
 
 ## Overview
