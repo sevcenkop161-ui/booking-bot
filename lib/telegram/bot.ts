@@ -2,6 +2,7 @@ import { Bot, Keyboard, type Context } from "grammy";
 import { createServiceClient } from "@/lib/supabase/service-client";
 import { formatArtistList, formatServiceList } from "@/lib/telegram/formatters";
 import { getActiveArtists, getActiveServices, getPrimaryBusiness } from "@/lib/telegram/queries";
+import { registerBookingFlow } from "@/lib/telegram/booking/handlers";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
@@ -118,10 +119,12 @@ bot.hears(MENU_LABELS.artists, async (ctx) => {
   await ctx.reply(formatArtistList(artists), { parse_mode: "HTML" });
 });
 
-// The booking flow and "my bookings" are built in the next phases — this
-// just confirms the buttons are wired up end to end.
-bot.hears([MENU_LABELS.book, MENU_LABELS.myBookings], async (ctx) => {
-  await ctx.reply("Этот раздел ещё в разработке — совсем скоро здесь можно будет записаться 🙂");
+registerBookingFlow(bot);
+
+// "My bookings" is built in a later phase — this just confirms the
+// button is wired up end to end.
+bot.hears(MENU_LABELS.myBookings, async (ctx) => {
+  await ctx.reply("Этот раздел ещё в разработке — совсем скоро здесь можно будет посмотреть свои записи 🙂");
 });
 
 bot.catch((err) => {
