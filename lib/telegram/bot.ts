@@ -1,5 +1,7 @@
 import { Bot, Keyboard, type Context } from "grammy";
 import { createServiceClient } from "@/lib/supabase/service-client";
+import { formatArtistList, formatServiceList } from "@/lib/telegram/formatters";
+import { getActiveArtists, getActiveServices, getPrimaryBusiness } from "@/lib/telegram/queries";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
@@ -63,12 +65,7 @@ bot.command("start", async (ctx) => {
     { onConflict: "telegram_id" }
   );
 
-  const { data: business } = await supabase
-    .from("businesses")
-    .select("name")
-    .limit(1)
-    .single();
-
+  const business = await getPrimaryBusiness(supabase);
   const businessName = business?.name ?? "нашу студию";
   await ctx.reply(`Добро пожаловать в ${businessName} 👋\nВыберите действие:`, {
     reply_markup: mainMenu,
@@ -80,7 +77,7 @@ bot.hears(MENU_LABELS.help, sendHelp);
 
 bot.hears(MENU_LABELS.about, async (ctx) => {
   const supabase = createServiceClient();
-  const { data: business } = await supabase.from("businesses").select("*").limit(1).single();
+  const business = await getPrimaryBusiness(supabase);
 
   if (!business) {
     await ctx.reply("Информация о студии временно недоступна.");
@@ -97,14 +94,35 @@ bot.hears(MENU_LABELS.about, async (ctx) => {
   await ctx.reply(lines.join("\n"));
 });
 
-// Booking flow, "my bookings", services, and artists are built in the
-// next phases — this just confirms the buttons are wired up end to end.
-bot.hears(
-  [MENU_LABELS.book, MENU_LABELS.myBookings, MENU_LABELS.services, MENU_LABELS.artists],
-  async (ctx) => {
-    await ctx.reply("Этот раздел ещё в разработке — совсем скоро здесь можно будет записаться 🙂");
+bot.hears(MENU_LABELS.services, async (ctx) => {
+  const supabase = createServiceClient();
+  const business = await getPrimaryBusiness(supabase);
+  if (!business) {
+    await ctx.reply("Информация об услугах временно недоступна.");
+    return;
   }
-);
+
+  const services = await getActiveServices(supabase, business.id);
+  await ctx.reply(formatServiceList(services), { parse_mode: "HTML" });
+});
+
+bot.hears(MENU_LABELS.artists, async (ctx) => {
+  const supabase = createServiceClient();
+  const business = await getPrimaryBusiness(supabase);
+  if (!business) {
+    await ctx.reply("Информация о мастерах временно недоступна.");
+    return;
+  }
+
+  const artists = await getActiveArtists(supabase, business.id);
+  await ctx.reply(formatArtistList(artists), { parse_mode: "HTML" });
+});
+
+// The booking flow and "my bookings" are built in the next phases — this
+// just confirms the buttons are wired up end to end.
+bot.hears([MENU_LABELS.book, MENU_LABELS.myBookings], async (ctx) => {
+  await ctx.reply("Этот раздел ещё в разработке — совсем скоро здесь можно будет записаться 🙂");
+});
 
 bot.catch((err) => {
   console.error("Telegram bot error:", err);

@@ -40,6 +40,9 @@ yarn-error.log*
 # Claude Code local tool state
 .claude/
 
+# Local dev tools (not part of the project)
+.tools/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
