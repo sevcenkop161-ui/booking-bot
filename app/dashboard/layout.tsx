@@ -8,6 +8,7 @@ import { LogoutButton } from "./logout-button";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview" },
   { href: "/dashboard/bookings", label: "Bookings" },
+  { href: "/dashboard/calendar", label: "Calendar" },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {

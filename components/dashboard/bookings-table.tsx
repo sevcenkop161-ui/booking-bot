@@ -1,22 +1,8 @@
+import Link from "next/link";
 import { DateTime } from "luxon";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { updateBookingStatus } from "@/app/dashboard/bookings/actions";
-import type { AdminBookingRow, BookingStatus } from "@/lib/dashboard/bookings";
-
-const NEXT_ACTIONS: Record<BookingStatus, { label: string; status: BookingStatus }[]> = {
-  PENDING: [
-    { label: "Подтвердить", status: "CONFIRMED" },
-    { label: "Отменить", status: "CANCELLED" },
-  ],
-  CONFIRMED: [
-    { label: "Завершить", status: "COMPLETED" },
-    { label: "Не пришёл", status: "NO_SHOW" },
-    { label: "Отменить", status: "CANCELLED" },
-  ],
-  CANCELLED: [],
-  COMPLETED: [],
-  NO_SHOW: [],
-};
+import { BookingActions } from "@/components/dashboard/booking-actions";
+import type { AdminBookingRow } from "@/lib/dashboard/bookings";
 
 export function BookingsTable({
   bookings,
@@ -50,9 +36,11 @@ export function BookingsTable({
           {bookings.map((booking) => (
             <tr key={booking.id}>
               <td className="whitespace-nowrap px-4 py-3 text-gray-900">
-                {DateTime.fromISO(booking.start_time, { zone: timezone })
-                  .setLocale("ru")
-                  .toFormat("d MMM, HH:mm")}
+                <Link href={`/dashboard/bookings/${booking.id}`} className="hover:underline">
+                  {DateTime.fromISO(booking.start_time, { zone: timezone })
+                    .setLocale("ru")
+                    .toFormat("d MMM, HH:mm")}
+                </Link>
               </td>
               <td className="px-4 py-3">
                 <div className="font-medium text-gray-900">{booking.client.first_name ?? "—"}</div>
@@ -66,18 +54,7 @@ export function BookingsTable({
                 <StatusBadge status={booking.status} />
               </td>
               <td className="px-4 py-3">
-                <div className="flex flex-wrap gap-2">
-                  {NEXT_ACTIONS[booking.status].map((action) => (
-                    <form key={action.status} action={updateBookingStatus.bind(null, booking.id, action.status)}>
-                      <button
-                        type="submit"
-                        className="rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
-                      >
-                        {action.label}
-                      </button>
-                    </form>
-                  ))}
-                </div>
+                <BookingActions bookingId={booking.id} status={booking.status} />
               </td>
             </tr>
           ))}
