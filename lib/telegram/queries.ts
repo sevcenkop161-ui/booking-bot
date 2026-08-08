@@ -205,3 +205,54 @@ export async function getActiveArtists(
   if (error) throw error;
   return data;
 }
+
+export interface BookingWithDetails {
+  id: string;
+  status: string;
+  date: string;
+  start_time: string;
+  comment: string | null;
+  service: { name: string };
+  artist: { name: string };
+  user: { telegram_id: number; first_name: string | null; phone: string | null };
+}
+
+export async function getBookingWithDetails(
+  supabase: SupabaseClient,
+  bookingId: string
+): Promise<BookingWithDetails | null> {
+  const { data } = await supabase
+    .from("bookings")
+    .select(
+      "id, status, date, start_time, comment, services(name), artists(name), users(telegram_id, first_name, phone)"
+    )
+    .eq("id", bookingId)
+    .maybeSingle();
+  if (!data) return null;
+
+  // PostgREST embeds related rows under the table name used in select()
+  // (plural: services/artists/users), not the singular field names this
+  // interface uses — map them explicitly instead of blind-casting.
+  const row = data as unknown as {
+    id: string;
+    status: string;
+    date: string;
+    start_time: string;
+    comment: string | null;
+    services: { name: string } | null;
+    artists: { name: string } | null;
+    users: { telegram_id: number; first_name: string | null; phone: string | null } | null;
+  };
+  if (!row.services || !row.artists || !row.users) return null;
+
+  return {
+    id: row.id,
+    status: row.status,
+    date: row.date,
+    start_time: row.start_time,
+    comment: row.comment,
+    service: row.services,
+    artist: row.artists,
+    user: row.users,
+  };
+}

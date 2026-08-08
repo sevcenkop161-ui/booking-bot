@@ -20,6 +20,7 @@ import {
 import { clearDraft, getDraft, startDraft, updateDraft, type BookingDraft } from "./draft-store";
 import { artistKeyboard, dateKeyboard, serviceKeyboard, timeKeyboard, type DateOption } from "./keyboards";
 import { formatDateOptionLabel, formatFullDate } from "./format";
+import { registerAdminActions, sendAdminNewBookingNotification } from "./notifications";
 
 const MAX_DATE_OPTIONS = 14;
 
@@ -38,6 +39,7 @@ export function registerBookingFlow(bot: Bot): void {
   // and this one only reacts when a draft is mid contact-info collection,
   // so any earlier exact-text handler (menu buttons) still gets first pick.
   bot.on("message:text", onContactText);
+  registerAdminActions(bot);
 }
 
 async function startBooking(ctx: Context): Promise<void> {
@@ -319,22 +321,112 @@ async function onRestart(ctx: Context): Promise<void> {
   });
 }
 
+const EXCLUSION_VIOLATION = "23P01";
+const UNIQUE_VIOLATION = "23505";
+
 async function onConfirm(ctx: Context): Promise<void> {
   const from = ctx.from;
   if (!from) return;
   const supabase = createServiceClient();
 
   const draft = await getDraft(supabase, from.id);
-  if (!draft || draft.step !== "confirm") {
+  if (
+    !draft ||
+    draft.step !== "confirm" ||
+    !draft.service_id ||
+    !draft.artist_id ||
+    !draft.date ||
+    !draft.start_time ||
+    !draft.end_time ||
+    !draft.name ||
+    !draft.phone
+  ) {
     await ctx.answerCallbackQuery();
     await expireDraft(ctx);
     return;
   }
 
+  const business = await getPrimaryBusiness(supabase);
+  if (!business) {
+    await ctx.answerCallbackQuery();
+    return;
+  }
+
+  // Re-validate everything right before writing, the same way each prior
+  // step did — nothing about the client's earlier choices is trusted
+  // blindly at creation time (section 15).
+  const [service, artist] = await Promise.all([
+    getActiveServiceById(supabase, business.id, draft.service_id),
+    getActiveArtistById(supabase, business.id, draft.artist_id),
+  ]);
+  if (!service || !artist) {
+    await ctx.answerCallbackQuery({ text: "Что-то из выбранного стало недоступно." });
+    await ctx.editMessageText("Услуга или мастер стали недоступны. Начните запись заново — «📅 Записаться».");
+    await clearDraft(supabase, from.id);
+    return;
+  }
+
+  const freshSlots = await computeSlots(supabase, business, draft.service_id, draft.artist_id, draft.date);
+  // Compare as instants, not strings: Postgres formats a timestamptz it
+  // reads back (e.g. "+00:00", no milliseconds) differently from JS's
+  // own toISOString(), so a raw string comparison here would fail even
+  // when both sides refer to the exact same moment.
+  const draftStartMs = Date.parse(draft.start_time);
+  const stillFree = freshSlots.some((slot) => Date.parse(slot.startTime) === draftStartMs);
+  if (!stillFree) {
+    await ctx.answerCallbackQuery({ text: "Это время только что заняли." });
+    await ctx.editMessageText("К сожалению, это время только что заняли 😔 Выберите другое:");
+    await showTimeStep(ctx, supabase, business, draft);
+    return;
+  }
+
+  // The users table has no separate "booking name" field, so what the
+  // client just typed becomes their contact name/phone going forward.
+  await supabase.from("users").update({ first_name: draft.name, phone: draft.phone }).eq("telegram_id", from.id);
+  const { data: user } = await supabase.from("users").select("id").eq("telegram_id", from.id).single();
+  if (!user) {
+    await ctx.answerCallbackQuery();
+    await ctx.editMessageText("Не удалось найти ваш профиль. Отправьте /start и попробуйте снова.");
+    return;
+  }
+
+  const { data: inserted, error } = await supabase
+    .from("bookings")
+    .insert({
+      business_id: business.id,
+      user_id: user.id,
+      artist_id: artist.id,
+      service_id: service.id,
+      date: draft.date,
+      start_time: draft.start_time,
+      end_time: draft.end_time,
+      status: "PENDING",
+      comment: draft.comment,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    // This is the real safety net (section 16): even if our in-app check
+    // above raced with another booking, Postgres's exclusion constraint
+    // rejects the conflicting INSERT outright.
+    if (error.code === EXCLUSION_VIOLATION || error.code === UNIQUE_VIOLATION) {
+      await ctx.answerCallbackQuery({ text: "Это время только что заняли." });
+      await ctx.editMessageText("К сожалению, это время только что заняли 😔 Выберите другое:");
+      await showTimeStep(ctx, supabase, business, draft);
+      return;
+    }
+    console.error("Failed to create booking:", error);
+    await ctx.answerCallbackQuery();
+    await ctx.editMessageText("Не удалось создать запись из-за технической ошибки. Попробуйте ещё раз позже.");
+    return;
+  }
+
+  await clearDraft(supabase, from.id);
   await ctx.answerCallbackQuery();
-  await ctx.editMessageText(
-    "Почти готово! Создание записи (с проверкой, что слот всё ещё свободен) появится на следующем шаге — эта часть в разработке."
-  );
+  await ctx.editMessageText("Заявка принята! ✅\nМы свяжемся с вами для подтверждения.");
+
+  await sendAdminNewBookingNotification(ctx.api, inserted.id);
 }
 
 // ---- shared step renderers (used for both forward and "back" navigation) ----
