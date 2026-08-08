@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/dashboard/require-admin";
 import { artistSchema } from "@/lib/validation/artists";
 import * as artists from "@/lib/dashboard/artists";
+import { logger } from "@/lib/logger";
 
 const FK_VIOLATION = "23503";
 
@@ -48,10 +49,11 @@ export async function createArtistAction(
   try {
     await artists.createArtist(supabase, business.id, parsed.data);
   } catch (err) {
-    console.error("Failed to create artist:", err);
+    logger.error("artist_create_failed", { error: String(err) });
     return { error: "Не удалось сохранить мастера.", values };
   }
 
+  logger.info("admin_action", { action: "artist_created", name: parsed.data.name });
   revalidatePath("/dashboard/artists");
   redirect("/dashboard/artists");
 }
@@ -72,10 +74,11 @@ export async function updateArtistAction(
   try {
     await artists.updateArtist(supabase, business.id, id, parsed.data);
   } catch (err) {
-    console.error("Failed to update artist:", err);
+    logger.error("artist_update_failed", { artistId: id, error: String(err) });
     return { error: "Не удалось сохранить мастера.", values };
   }
 
+  logger.info("admin_action", { action: "artist_updated", artistId: id });
   revalidatePath("/dashboard/artists");
   redirect("/dashboard/artists");
 }
@@ -83,6 +86,7 @@ export async function updateArtistAction(
 export async function setArtistActiveAction(id: string, active: boolean): Promise<void> {
   const { supabase, business } = await requireAdmin();
   await artists.setArtistActive(supabase, business.id, id, active);
+  logger.info("admin_action", { action: active ? "artist_enabled" : "artist_disabled", artistId: id });
   revalidatePath("/dashboard/artists");
 }
 
@@ -94,9 +98,11 @@ export async function deleteArtistAction(id: string): Promise<void> {
   } catch (err) {
     const code = (err as { code?: string }).code;
     const reason = code === FK_VIOLATION ? "cannot_delete" : "delete_failed";
+    logger.warn("artist_delete_blocked", { artistId: id, reason });
     redirect(`/dashboard/artists?error=${reason}`);
   }
 
+  logger.info("admin_action", { action: "artist_deleted", artistId: id });
   revalidatePath("/dashboard/artists");
   redirect("/dashboard/artists");
 }

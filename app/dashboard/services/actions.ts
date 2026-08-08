@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/dashboard/require-admin";
 import { serviceSchema } from "@/lib/validation/services";
 import * as services from "@/lib/dashboard/services";
+import { logger } from "@/lib/logger";
 
 const FK_VIOLATION = "23503";
 
@@ -46,10 +47,11 @@ export async function createServiceAction(
   try {
     await services.createService(supabase, business.id, parsed.data);
   } catch (err) {
-    console.error("Failed to create service:", err);
+    logger.error("service_create_failed", { error: String(err) });
     return { error: "Не удалось сохранить услугу.", values };
   }
 
+  logger.info("admin_action", { action: "service_created", name: parsed.data.name });
   revalidatePath("/dashboard/services");
   redirect("/dashboard/services");
 }
@@ -70,10 +72,11 @@ export async function updateServiceAction(
   try {
     await services.updateService(supabase, business.id, id, parsed.data);
   } catch (err) {
-    console.error("Failed to update service:", err);
+    logger.error("service_update_failed", { serviceId: id, error: String(err) });
     return { error: "Не удалось сохранить услугу.", values };
   }
 
+  logger.info("admin_action", { action: "service_updated", serviceId: id });
   revalidatePath("/dashboard/services");
   redirect("/dashboard/services");
 }
@@ -81,6 +84,7 @@ export async function updateServiceAction(
 export async function setServiceActiveAction(id: string, active: boolean): Promise<void> {
   const { supabase, business } = await requireAdmin();
   await services.setServiceActive(supabase, business.id, id, active);
+  logger.info("admin_action", { action: active ? "service_enabled" : "service_disabled", serviceId: id });
   revalidatePath("/dashboard/services");
 }
 
@@ -92,9 +96,11 @@ export async function deleteServiceAction(id: string): Promise<void> {
   } catch (err) {
     const code = (err as { code?: string }).code;
     const reason = code === FK_VIOLATION ? "cannot_delete" : "delete_failed";
+    logger.warn("service_delete_blocked", { serviceId: id, reason });
     redirect(`/dashboard/services?error=${reason}`);
   }
 
+  logger.info("admin_action", { action: "service_deleted", serviceId: id });
   revalidatePath("/dashboard/services");
   redirect("/dashboard/services");
 }

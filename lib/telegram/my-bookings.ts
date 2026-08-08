@@ -11,6 +11,7 @@ import {
   type UserBooking,
 } from "@/lib/telegram/queries";
 import { sendAdminCancellationNotice } from "@/lib/telegram/booking/notifications";
+import { logger } from "@/lib/logger";
 
 const PAST_BOOKINGS_LIMIT = 5;
 
@@ -184,6 +185,7 @@ async function onCancelConfirm(ctx: Context): Promise<void> {
   await ctx.editMessageText(
     `Запись отменена ✅\n\n${formatBookingLine(booking, business.timezone)}`
   );
+  logger.info("booking_cancelled", { bookingId, by: "client" });
 
   await sendAdminCancellationNotice(ctx.api, bookingId);
 }

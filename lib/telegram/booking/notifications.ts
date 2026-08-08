@@ -3,6 +3,7 @@ import { InlineKeyboard, type Api, type Bot, type Context } from "grammy";
 import { createServiceClient } from "@/lib/supabase/service-client";
 import { getBookingWithDetails, getPrimaryBusiness, type Business } from "@/lib/telegram/queries";
 import { formatFullDate } from "./format";
+import { logger } from "@/lib/logger";
 
 function adminChatId(): number | null {
   const raw = process.env.ADMIN_TELEGRAM_ID;
@@ -37,7 +38,7 @@ function buildNotificationText(business: Business, booking: {
 export async function sendAdminNewBookingNotification(api: Api, bookingId: string): Promise<void> {
   const chatId = adminChatId();
   if (!chatId) {
-    console.error("ADMIN_TELEGRAM_ID is not set — skipping admin notification");
+    logger.warn("admin_telegram_id_missing", { bookingId });
     return;
   }
 
@@ -121,6 +122,7 @@ async function onAdminAction(ctx: Context): Promise<void> {
   }
 
   await ctx.answerCallbackQuery();
+  logger.info("admin_action", { action: `booking_${action}`, bookingId, adminTelegramId: from.id });
 
   const business = await getPrimaryBusiness(supabase);
   const zone = business?.timezone ?? "UTC";

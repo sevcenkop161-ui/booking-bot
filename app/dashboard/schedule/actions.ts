@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/dashboard/require-admin";
 import { weekScheduleSchema, timeOffSchema } from "@/lib/validation/schedule";
 import * as schedule from "@/lib/dashboard/schedule";
+import { logger } from "@/lib/logger";
 
 const DAY_NAMES = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
 
@@ -62,10 +63,11 @@ export async function saveScheduleAction(
   try {
     await schedule.saveArtistWeekSchedule(supabase, business.id, artistId, parsed.data);
   } catch (err) {
-    console.error("Failed to save schedule:", err);
+    logger.error("schedule_save_failed", { artistId, error: String(err) });
     return { error: "Не удалось сохранить расписание.", values };
   }
 
+  logger.info("admin_action", { action: "schedule_saved", artistId });
   revalidatePath("/dashboard/schedule");
   return { values, success: true };
 }
@@ -84,6 +86,7 @@ export async function addTimeOffAction(artistId: string, formData: FormData): Pr
   }
 
   await schedule.addTimeOff(supabase, business.id, artistId, parsed.data);
+  logger.info("admin_action", { action: "time_off_added", artistId });
   revalidatePath("/dashboard/schedule");
   redirect(`/dashboard/schedule?artist=${artistId}`);
 }
@@ -91,6 +94,7 @@ export async function addTimeOffAction(artistId: string, formData: FormData): Pr
 export async function deleteTimeOffAction(artistId: string, id: string): Promise<void> {
   const { supabase } = await requireAdmin();
   await schedule.deleteTimeOff(supabase, id);
+  logger.info("admin_action", { action: "time_off_deleted", artistId, timeOffId: id });
   revalidatePath("/dashboard/schedule");
   redirect(`/dashboard/schedule?artist=${artistId}`);
 }

@@ -21,6 +21,7 @@ import { clearDraft, getDraft, startDraft, updateDraft, type BookingDraft } from
 import { artistKeyboard, dateKeyboard, serviceKeyboard, timeKeyboard, type DateOption } from "./keyboards";
 import { formatDateOptionLabel, formatFullDate } from "./format";
 import { registerAdminActions, sendAdminNewBookingNotification } from "./notifications";
+import { logger } from "@/lib/logger";
 
 const MAX_DATE_OPTIONS = 14;
 
@@ -411,12 +412,13 @@ async function onConfirm(ctx: Context): Promise<void> {
     // above raced with another booking, Postgres's exclusion constraint
     // rejects the conflicting INSERT outright.
     if (error.code === EXCLUSION_VIOLATION || error.code === UNIQUE_VIOLATION) {
+      logger.warn("booking_conflict", { artistId: artist.id, serviceId: service.id, date: draft.date });
       await ctx.answerCallbackQuery({ text: "Это время только что заняли." });
       await ctx.editMessageText("К сожалению, это время только что заняли 😔 Выберите другое:");
       await showTimeStep(ctx, supabase, business, draft);
       return;
     }
-    console.error("Failed to create booking:", error);
+    logger.error("booking_creation_failed", { error: String(error) });
     await ctx.answerCallbackQuery();
     await ctx.editMessageText("Не удалось создать запись из-за технической ошибки. Попробуйте ещё раз позже.");
     return;
@@ -425,6 +427,9 @@ async function onConfirm(ctx: Context): Promise<void> {
   await clearDraft(supabase, from.id);
   await ctx.answerCallbackQuery();
   await ctx.editMessageText("Заявка принята! ✅\nМы свяжемся с вами для подтверждения.");
+
+  // IDs only — never log the client's name/phone/comment (section 58).
+  logger.info("booking_created", { bookingId: inserted.id, artistId: artist.id, serviceId: service.id });
 
   await sendAdminNewBookingNotification(ctx.api, inserted.id);
 }

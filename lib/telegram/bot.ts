@@ -4,6 +4,7 @@ import { formatArtistList, formatServiceList } from "@/lib/telegram/formatters";
 import { getActiveArtists, getActiveServices, getPrimaryBusiness } from "@/lib/telegram/queries";
 import { registerBookingFlow } from "@/lib/telegram/booking/handlers";
 import { registerMyBookingsFlow } from "@/lib/telegram/my-bookings";
+import { logger } from "@/lib/logger";
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 if (!token) {
@@ -129,5 +130,8 @@ registerMyBookingsFlow(bot);
 registerBookingFlow(bot);
 
 bot.catch((err) => {
-  console.error("Telegram bot error:", err);
+  logger.error("telegram_bot_handler_failed", {
+    updateId: err.ctx.update.update_id,
+    error: String(err.error),
+  });
 });

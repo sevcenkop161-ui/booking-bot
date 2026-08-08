@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/dashboard/require-admin";
 import { BOOKING_STATUSES, type BookingStatus } from "@/lib/dashboard/bookings";
+import { logger } from "@/lib/logger";
 
 // requireAdmin() is the explicit app-level check; the "admins can
 // update their business bookings" RLS policy is the real backstop —
@@ -13,9 +14,10 @@ export async function updateBookingStatus(bookingId: string, newStatus: BookingS
     throw new Error(`Invalid status: ${newStatus}`);
   }
 
-  const { supabase } = await requireAdmin();
+  const { supabase, userId } = await requireAdmin();
   const { error } = await supabase.from("bookings").update({ status: newStatus }).eq("id", bookingId);
   if (error) throw error;
 
+  logger.info("admin_action", { action: "booking_status_changed", bookingId, newStatus, adminUserId: userId });
   revalidatePath("/dashboard/bookings");
 }

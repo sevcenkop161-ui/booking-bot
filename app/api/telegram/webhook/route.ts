@@ -3,6 +3,7 @@ import { bot, ensureBotInitialized } from "@/lib/telegram/bot";
 import { claimUpdate } from "@/lib/telegram/idempotency";
 import { createServiceClient } from "@/lib/supabase/service-client";
 import { isRateLimited } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 // Loose on purpose: we only need to trust update_id enough to key
 // idempotency on it, and the sender's id enough to rate-limit by it.
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     // Always answer Telegram with 200: this update_id is already claimed,
     // so a Telegram-triggered retry would just be dropped by claimUpdate
     // anyway (see its comment). Logging is how we notice failures instead.
-    console.error("Failed to handle Telegram update:", err);
+    logger.error("telegram_webhook_failed", { updateId: update.update_id, error: String(err) });
   }
 
   return new Response(null, { status: 200 });
