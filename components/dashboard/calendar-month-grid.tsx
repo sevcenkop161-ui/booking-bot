@@ -19,7 +19,8 @@ export function CalendarMonthGrid({
   currentMonth: number;
 }) {
   return (
-    <div className="grid grid-cols-7 gap-px overflow-hidden rounded-lg border border-gray-200 bg-gray-200 text-sm">
+    <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <div className="grid min-w-[700px] grid-cols-7 gap-px bg-gray-200 text-sm">
       {days.map((day) => {
         const dateKey = day.toISODate()!;
         const bookings = bookingsByDate.get(dateKey) ?? [];
@@ -56,6 +57,7 @@ export function CalendarMonthGrid({
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
